@@ -1,0 +1,152 @@
+﻿<!doctype html>
+<html lang="fr">
+	<head>
+		<meta charset="utf-8">
+		<title>the dark sea</title>
+		<script src="librairie/easeljs-0.8.2.min.js"></script>
+		<script src="Tank.js"></script>
+		<script src="Balle.js"></script>
+		<script src="Boite.js"></script>	
+		<script src="Boss.js"></script>	
+		<script src="Mur.js"></script>	
+		<script src="ArrierePlan.js"></script>
+		<script src="Jeu.js"></script>
+		<script src="VueAccueil.js"></script>
+		<script src="VueFin.js"></script>
+		<script src="VueJeu.js"></script>
+		<script src="application.js"></script>
+
+		<style>
+			html {
+			margin: 0;
+			padding: 0;
+			height: 100%;
+			}
+
+			body {
+				margin: 0;
+				padding: 0;
+				height: 100%;
+				background-image: url("illustration/menuback.png");
+				background-repeat: no-repeat;
+  				background-size: 1563px 763px;
+				max-height: 100%;
+				overflow: hidden;
+				float: left;
+				width: 100%;
+			}
+
+			#menu-container {
+				width: 340px;
+				text-align: center;
+				margin: auto;
+			}
+
+			#menu-container h1 {
+				font-size: 50px;
+				color: white;
+				font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+				font-weight: bold;
+				margin-top: 30px;
+				margin-bottom: 200px;
+			}
+
+			.menu {
+				color: white;
+				padding: 30px;
+				border-radius: 25px;
+				background-color: grey;
+			}
+
+			.menu h2{
+				color: black;
+				margin-bottom: 50px;
+			}
+
+			.menu a{
+				color: black;
+				padding: 20px;
+				border-radius: 20px;
+				text-decoration: none;
+				background-color: rgb(70, 70, 70);
+			}
+			.menu a:hover {
+				color:white;
+				background-color: rgb(17, 17, 17);
+			}
+
+			.score-div {
+				position: absolute;
+				z-index: 1;
+				width: auto;
+				height: auto;
+				background-color: black;
+			}
+
+			.score-div *{
+				margin: 5px;
+				display: inline-block;
+			}
+
+			.score-div a {
+				color: black;
+				padding: 5px;
+				margin: 5px;
+				border-radius: 20px;
+				text-decoration: none;
+				background-color: grey;
+			}
+
+			.score-div a:hover {
+				background-color: rgb(102, 102, 102);
+			}
+
+			#score-div-gauche {
+				left: 0px;
+				margin: 10px;
+			}
+
+			.score-texte {
+				text-align: center;
+				color: white;
+			}
+			
+
+		</style>
+	</head>
+	<body>
+
+		<script type="plain/text" id="page-accueil">
+			<div id="menu-container">
+				<h1>the dark sea</h1>
+				<div class="menu">
+					<form id="formulaire-joueur">
+						<label>Entrer votre Nom :</label>
+						<input type="text" id="nom-joueur"/>
+						<input type="submit" id="enregistrer-joueur" value="Jouer"/>
+					</form>
+				</div>
+			</div>
+		</script>
+
+		<script type="plain/text" id="page-fin">
+			<div id="menu-container">
+				<h1>the dark sea</h1>
+				<div class="menu">
+					<h2>{texte-fin-partie}</h2>
+					<a href="#accueil">Accueil</a>
+				</div>
+			</div>
+		</script>
+
+		<script type="plain/text" id="page-jeu">
+			<div class="score-div" id="score-div-gauche">
+				<h3 class="score-texte" id="scoreJ1">score : </h3>
+				<a href="#fin-partie-gagnee">fin Gagnante</a>
+				<a href="#fin-partie-perdue">fin Perdue</a>
+			</div>
+			<canvas id="dessin" height="763" width="1563"></canvas>
+		</script>
+
+	</body>
+</html>
