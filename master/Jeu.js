@@ -11,6 +11,10 @@ var Jeu = function(){
 
 	//Etat du clique gauche
 	var gestionTouche = {
+		recule: false,
+        avance: false,
+        tourneDroite: false,
+        tourneGauche: false,
 		cliqueGauche: false
 	}
 	
@@ -61,6 +65,7 @@ var Jeu = function(){
 				gererCollisionRectangleBalle(mur.getRectangle(), tank.listeBalle());
 
 				tank.avancerBalles();
+				gererDeplacementsTank();
 
 				gererTir();
 
@@ -85,10 +90,10 @@ var Jeu = function(){
 
 //Section Abonnement au Events --------------------------------------
 
-		window.addEventListener("keydown", gererTouchePresser);
+		/*window.addEventListener("keydown", gererTouchePresser);
 		window.addEventListener("keyup", gererToucheLever);
 		window.addEventListener("mousedown", function(){gestionTouche.cliqueGauche = true;});
-		window.addEventListener("mouseup", function(){gestionTouche.cliqueGauche = false;});
+		window.addEventListener("mouseup", function(){gestionTouche.cliqueGauche = false;});*/
 
 
 //Section chargement du Jeu --------------------------------------
@@ -178,31 +183,93 @@ var Jeu = function(){
 			tank.Tirer();
 	}
 
-    var gererTouchePresser = function(evenement){//gere le deplacement du tank selon la touche enfoncer
-		switch (evenement.keyCode){
-			case TOUCHE_DROITE:
-			case TOUCHE_D:
-				tank.tourner("D");
+	this.updateGestionTouche = function(touche, valeur){
+		console.log(touche + " -> " + valeur);
+		switch (touche){
+			case "recule":
+				gestionTouche.recule = valeur;
 				break;
-			case TOUCHE_GAUCHE:
-			case TOUCHE_A:
-				tank.tourner("G");
+			case "avance":
+				gestionTouche.avance = valeur;
 				break;
-			case TOUCHE_HAUT:
-			case TOUCHE_W:
-				tank.avancer();
+			case "tourne-droite":
+				gestionTouche.tourneDroite = valeur;
 				break;
-			case TOUCHE_BAS:
-			case TOUCHE_S:
-				tank.reculer();
+			case "tourne-gauche":
+				gestionTouche.tourneGauche = valeur;
+				break;
+			case "clique-gauche":
+				gestionTouche.cliqueGauche = valeur;
 				break;
 		}
 	}
 
-	var gererToucheLever = function(evenement){//termine un deplacement du tank
-		tank.arreter();
+	/*var gererTouchePresser = function(evenement){//gere le deplacement du tank selon la touche enfoncer
+		if (aucunControle()){
+			switch (evenement.keyCode){
+				case TOUCHE_DROITE:
+				case TOUCHE_D:
+					gestionTouche.tourneDroite = true;
+					break;
+				case TOUCHE_GAUCHE:
+				case TOUCHE_A:
+					gestionTouche.tourneGauche = true;
+					break;
+				case TOUCHE_HAUT:
+				case TOUCHE_W:
+					gestionTouche.avance = true;
+					break;
+				case TOUCHE_BAS:
+				case TOUCHE_S:
+					gestionTouche.recule = true;
+					break;
+			}
+		}
 	}
 
+	var aucunControle = function(){
+        return (!gestionTouche.avance && !gestionTouche.recule && !gestionTouche.tourneGauche && !gestionTouche.tourneDroite);
+    }
+
+	var gererToucheLever = function(evenement){//termine un deplacement du tank
+		switch (evenement.keyCode){
+			case TOUCHE_DROITE:
+			case TOUCHE_D:
+				gestionTouche.tourneDroite = false;
+				break;
+			case TOUCHE_GAUCHE:
+			case TOUCHE_A:
+				gestionTouche.tourneGauche = false;
+				break;
+			case TOUCHE_HAUT:
+			case TOUCHE_W:
+				gestionTouche.avance = false;
+				break;
+			case TOUCHE_BAS:
+			case TOUCHE_S:
+				gestionTouche.recule = false;
+				break;
+		}
+		tank.arreter();
+	}*/
+
+
+	var gererDeplacementsTank = function(){
+		if (gestionTouche.tourneDroite){
+			tank.tourner("D");
+		} else
+		if (gestionTouche.tourneGauche){
+			tank.tourner("G");
+		} else
+		if (gestionTouche.avance){
+			tank.avancer();
+		} else
+		if (gestionTouche.recule){
+			tank.reculer();
+		} else {
+			tank.arreter();
+		}
+	}
 
 //Section Gestion des collisions --------------------------------------
 

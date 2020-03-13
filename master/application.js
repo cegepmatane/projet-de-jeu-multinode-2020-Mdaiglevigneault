@@ -8,13 +8,20 @@
     var vueJeu;
     var vueFin;
 
+    var multijoueur;
+
     var initialiser = function(){//cree les vue jeu, accueil et fun et affiche accueil
-        vueAccueil = new VueAccueil(lancerJeu);
+        //vueAccueil = new VueAccueil(lancerJeu);OLD
         vueJeu = new VueJeu();
         vueFin = new VueFin();
         
-        nomJoueur = null;
-        vueAccueil.afficher(null);
+        nomJoueur = "1";
+
+        multijoueur = new Multijoueur(validerNom);
+
+        //vueAccueil.afficher(null);OLD
+        multijoueur.initialiserVue(nomJoueur);
+        
 
         window.addEventListener("hashchange", naviguer);
     }
@@ -23,7 +30,8 @@
         if (nomJoueur != null){
             var hash = window.location.hash;
             if (hash.match(/^#accueil/)){
-                vueAccueil.afficher(nomJoueur);
+                multijoueur.initialiserVue(nomJoueur);
+                //vueAccueil.afficher(nomJoueur);
             } else if (hash.match(/^#jouer/)){
                 creeJeu();
             } else if (hash.match(/^#fin-partie-gagnee/)){
@@ -39,14 +47,16 @@
     var creeJeu = function(){//affiche la vue jeu et cree un jeu
         vueJeu.afficher();
         jeu = new Jeu();
+        multijoueur.setJeu(jeu);
     }
 
-    var lancerJeu = function(nomDuJoueur){//verifie le nom et change le hash
+    var validerNom = function(nomDuJoueur){//verifie le nom et change le hash
         if (nomDuJoueur != ""){
             nomJoueur = nomDuJoueur;
-            window.location.href = "#jouer";
+            return true;
         } else {
             alert("Veuillez entrer un nom pour jouer!");
+            return false;
         }   
     }
 

@@ -4,6 +4,7 @@
 		<meta charset="utf-8">
 		<title>the dark sea</title>
 		<script src="librairie/easeljs-0.8.2.min.js"></script>
+		<script src="librairie/MultiNode.js"></script>
 		<script src="Tank.js"></script>
 		<script src="Balle.js"></script>
 		<script src="Boite.js"></script>	
@@ -11,10 +12,12 @@
 		<script src="Mur.js"></script>	
 		<script src="ArrierePlan.js"></script>
 		<script src="Jeu.js"></script>
+		<script src="multijoueur.js"></script>
 		<script src="VueAccueil.js"></script>
 		<script src="VueFin.js"></script>
 		<script src="VueJeu.js"></script>
 		<script src="application.js"></script>
+		
 
 		<style>
 			html {
@@ -115,15 +118,16 @@
 		</style>
 	</head>
 	<body>
-
 		<script type="plain/text" id="page-accueil">
 			<div id="menu-container">
 				<h1>the dark sea</h1>
 				<div class="menu">
-					<form id="formulaire-joueur">
-						<label>Entrer votre Nom :</label>
-						<input type="text" id="nom-joueur"/>
-						<input type="submit" id="enregistrer-joueur" value="Jouer"/>
+					<form id="formulaire-authentification">
+						<fieldset>
+							<label>Entrer votre Nom :</label>
+							<input type="text" id="pseudonyme"/>
+							<input type="submit" id="bouton-authentification" value="Jouer"/>
+						</fieldset>
 					</form>
 				</div>
 			</div>
