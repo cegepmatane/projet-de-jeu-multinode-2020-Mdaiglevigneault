@@ -1,16 +1,15 @@
 var Jeu = function(){
-	//Constantes de touches
-	var TOUCHE_GAUCHE = 37;
-	var TOUCHE_DROITE = 39;
-	var TOUCHE_BAS = 40;
-	var TOUCHE_HAUT = 38;
-	var TOUCHE_W = 87;
-	var TOUCHE_S = 83;
-	var TOUCHE_A = 65;
-	var TOUCHE_D = 68;
 
 	//Etat du clique gauche
-	var gestionTouche = {
+	var gestionToucheJoueur1 = {
+		recule: false,
+        avance: false,
+        tourneDroite: false,
+        tourneGauche: false,
+		cliqueGauche: false
+	}
+
+	var gestionToucheJoueur2 = {
 		recule: false,
         avance: false,
         tourneDroite: false,
@@ -18,24 +17,30 @@ var Jeu = function(){
 		cliqueGauche: false
 	}
 	
+	var NumeroJoueur;
+	var aviserServeurPointage;
+	var aviserServeurGagnant;
+
 	//Element de la page
-	var scoreJoueur = {texte:null,valeur:0};
+	var scoreJoueur1 = {element:null,texte:"",valeur:0,index:1};
+	var scoreJoueur2 = {element:null,texte:"",valeur:0,index:2};
 	var scene;
 	var testChargement;
 
 	//Objets
 	var arrierePlan;
-	var tank;
-	var mur;
+	var tankJoueur1;
+	var mur1;
+	var mur2;
 	var boss;
-	var nombreBoites = 7;
+	var nombreBoites = 14;
 	var listeBoite = [];
 
 	
     var initialiser = function(){//trouve le canvas et le 'hud', cree la scene
 		var dessin = document.getElementById("dessin");
-		scoreJoueur.texte = document.getElementById("scoreJ1");
-		afficherScore();//afficher le score de départ
+		scoreJoueur1.element = document.getElementById("scoreJ1");
+		scoreJoueur2.element = document.getElementById("scoreJ2");
 		scene = new createjs.Stage(dessin);
 		console.log("scene creer");
 		
@@ -43,10 +48,12 @@ var Jeu = function(){
 //Section Creation --------------------------------------
 
 		arrierePlan = new ArrierePlan(scene);
-		mur = new Mur(scene);
+		mur1 = new Mur(scene, 1);
+		mur2 = new Mur(scene, 2);
 		creerBoites();
 		boss = new Boss(scene);
-		tank = new Tank(scene);
+		tankJoueur1 = new Tank(scene, 1);
+		tankJoueur2 = new Tank(scene, 2);
 		
 
 //Section Ticker --------------------------------------
@@ -55,17 +62,27 @@ var Jeu = function(){
 		var gererTick = function(evenementTick){//gameLoop
 			if (window.location.href.search("#jouer") == -1){
 				terminerJeu(null);
-			} else if (gererCollisionRectangleBalle(boss.getRectangle(), tank.listeBalle())){
-				terminerJeu(true);
+			} else if ((NumeroJoueur == 1 && gererCollisionRectangleBalle(boss.getRectangle(), tankJoueur1.listeBalle()))
+					 ||(NumeroJoueur == 2 && gererCollisionRectangleBalle(boss.getRectangle(), tankJoueur2.listeBalle()))) {
+				createjs.Ticker.removeEventListener("tick", gererTick);
+				aviserServeurGagnant();
 			} else if (arrierePlan.tempsEstEcoule()){
+				createjs.Ticker.removeEventListener("tick", gererTick);
 				terminerJeu(false);
 			} else {
-				gererCollisionBoiteBalle(tank.listeBalle(),listeBoite);
-				gererCollisionTank(tank.getRectangle(), listeBoite);
-				gererCollisionRectangleBalle(mur.getRectangle(), tank.listeBalle());
 
-				tank.avancerBalles();
-				gererDeplacementsTank();
+				gererCollisionBoiteBalle(tankJoueur1.listeBalle(),listeBoite, scoreJoueur1.index);
+				gererCollisionTank(tankJoueur1,tankJoueur1.getRectangle(), listeBoite);
+				gererCollisionRectangleBalle(mur1.getRectangle(), tankJoueur1.listeBalle());
+
+				gererCollisionBoiteBalle(tankJoueur2.listeBalle(),listeBoite, scoreJoueur2.index);
+				gererCollisionTank(tankJoueur2,tankJoueur2.getRectangle(), listeBoite);
+				gererCollisionRectangleBalle(mur2.getRectangle(), tankJoueur2.listeBalle());
+
+				tankJoueur1.avancerBalles();
+				tankJoueur2.avancerBalles();
+				gererDeplacementsTankJoueur(tankJoueur1, gestionToucheJoueur1);
+				gererDeplacementsTankJoueur(tankJoueur2, gestionToucheJoueur2);
 
 				gererTir();
 
@@ -76,30 +93,10 @@ var Jeu = function(){
 			}
 		}
 
-		var terminerJeu = function(gagner){//termine le jeu
-			createjs.Ticker.removeEventListener("tick", gererTick);
-			if (gagner != null){
-				if (gagner){
-					window.location.href = "#fin-partie-gagnee";
-				} else {
-					window.location.href = "#fin-partie-perdue";
-				}
-			}
-		}
-		
-
-//Section Abonnement au Events --------------------------------------
-
-		/*window.addEventListener("keydown", gererTouchePresser);
-		window.addEventListener("keyup", gererToucheLever);
-		window.addEventListener("mousedown", function(){gestionTouche.cliqueGauche = true;});
-		window.addEventListener("mouseup", function(){gestionTouche.cliqueGauche = false;});*/
-
-
 //Section chargement du Jeu --------------------------------------
 
 		var testerChargement = function(objet){//verifie le changement de tout les composants
-			if(tank.estCharge() && listeBoiteEstCharge() && arrierePlan.estCharge() && mur.estCharge() && boss.estCharge()){
+			if(tankJoueur1.estCharge() && tankJoueur2.estCharge() && listeBoiteEstCharge() && arrierePlan.estCharge() && mur1.estCharge() && mur2.estCharge() && boss.estCharge()){
 				console.log("(Prêts a afficher == true");
 				afficherObjet();
 				createjs.Ticker.addEventListener("tick", gererTick);
@@ -115,15 +112,18 @@ var Jeu = function(){
 //Section Affichage sur la page  --------------------------------------
 
 	var afficherScore = function(){//met a jour le score du joueur
-		scoreJoueur.texte.innerHTML = "score : " + scoreJoueur.valeur;
+		scoreJoueur1.element.innerHTML = scoreJoueur1.texte + scoreJoueur1.valeur;
+		scoreJoueur2.element.innerHTML = scoreJoueur2.texte + scoreJoueur2.valeur;
 	}
 
 	var afficherObjet = function (){
 		arrierePlan.afficher();
 		boss.afficher();
-		mur.afficher();
+		mur1.afficher();
+		mur2.afficher();
 		afficherListeBoite();
-		tank.afficher();
+		tankJoueur1.afficher();
+		tankJoueur2.afficher();
 	}
 	
 
@@ -154,6 +154,27 @@ var Jeu = function(){
 				case 6:
 					position = {x:550,y:570};
 					break;
+				case 7:
+					position = {x:900,y:90};
+					break;
+				case 8:
+					position = {x:1000,y:170};
+					break;
+				case 9:
+					position = {x:900,y:250};
+					break;
+				case 10:
+					position = {x:1000,y:330};
+					break;
+				case 11:
+					position = {x:900,y:410};
+					break;
+				case 12:
+					position = {x:1000,y:490};
+					break;
+				case 13:
+					position = {x:900,y:570};
+					break;
 			}
 			listeBoite[i] = new Boite(scene,position);
 		}
@@ -178,96 +199,120 @@ var Jeu = function(){
 
 //Section fonctions des EventsListeners --------------------------------------
 
-	var gererTir = function(){//tank tir si clique gauche est presser
-		if (gestionTouche.cliqueGauche == true)
-			tank.Tirer();
+	var gererTir = function(){//tankJoueur1 tir si clique gauche est presser
+		if (gestionToucheJoueur1.cliqueGauche == true)
+			tankJoueur1.Tirer();
+		if (gestionToucheJoueur2.cliqueGauche == true)
+			tankJoueur2.Tirer();
 	}
 
-	this.updateGestionTouche = function(touche, valeur){
+	this.updateGestionToucheJoueur1 = function(touche, valeur){
 		console.log(touche + " -> " + valeur);
 		switch (touche){
+			case "gagne" :
+				terminerJeu(NumeroJoueur == 1);
+				break;
+			case "ajoutpoint" :
+				scoreJoueur1.valeur++;
+				afficherScore();
+				if (scoreJoueur1.valeur >= 7){
+					mur1.detruire();
+				}
+				break;
 			case "recule":
-				gestionTouche.recule = valeur;
+				gestionToucheJoueur1.recule = valeur;
 				break;
 			case "avance":
-				gestionTouche.avance = valeur;
+				gestionToucheJoueur1.avance = valeur;
 				break;
 			case "tourne-droite":
-				gestionTouche.tourneDroite = valeur;
+				gestionToucheJoueur1.tourneDroite = valeur;
 				break;
 			case "tourne-gauche":
-				gestionTouche.tourneGauche = valeur;
+				gestionToucheJoueur1.tourneGauche = valeur;
 				break;
 			case "clique-gauche":
-				gestionTouche.cliqueGauche = valeur;
+				gestionToucheJoueur1.cliqueGauche = valeur;
 				break;
 		}
 	}
 
-	/*var gererTouchePresser = function(evenement){//gere le deplacement du tank selon la touche enfoncer
-		if (aucunControle()){
-			switch (evenement.keyCode){
-				case TOUCHE_DROITE:
-				case TOUCHE_D:
-					gestionTouche.tourneDroite = true;
-					break;
-				case TOUCHE_GAUCHE:
-				case TOUCHE_A:
-					gestionTouche.tourneGauche = true;
-					break;
-				case TOUCHE_HAUT:
-				case TOUCHE_W:
-					gestionTouche.avance = true;
-					break;
-				case TOUCHE_BAS:
-				case TOUCHE_S:
-					gestionTouche.recule = true;
-					break;
-			}
+	this.updateGestionToucheJoueur2 = function(touche, valeur){
+		console.log(touche + " -> " + valeur);
+		switch (touche){
+			case "gagne" :
+				terminerJeu(NumeroJoueur == 2);
+				break;
+			case "ajoutpoint" :
+				scoreJoueur2.valeur++;
+				afficherScore();
+				if (scoreJoueur2.valeur >= 7){
+					mur2.detruire();
+				}
+				break;
+			case "recule":
+				gestionToucheJoueur2.recule = valeur;
+				break;
+			case "avance":
+				gestionToucheJoueur2.avance = valeur;
+				break;
+			case "tourne-droite":
+				gestionToucheJoueur2.tourneDroite = valeur;
+				break;
+			case "tourne-gauche":
+				gestionToucheJoueur2.tourneGauche = valeur;
+				break;
+			case "clique-gauche":
+				gestionToucheJoueur2.cliqueGauche = valeur;
+				break;
 		}
 	}
 
-	var aucunControle = function(){
-        return (!gestionTouche.avance && !gestionTouche.recule && !gestionTouche.tourneGauche && !gestionTouche.tourneDroite);
-    }
+	this.setNumeroJoueur = function(numero){
+		NumeroJoueur = numero;
+	}
 
-	var gererToucheLever = function(evenement){//termine un deplacement du tank
-		switch (evenement.keyCode){
-			case TOUCHE_DROITE:
-			case TOUCHE_D:
-				gestionTouche.tourneDroite = false;
-				break;
-			case TOUCHE_GAUCHE:
-			case TOUCHE_A:
-				gestionTouche.tourneGauche = false;
-				break;
-			case TOUCHE_HAUT:
-			case TOUCHE_W:
-				gestionTouche.avance = false;
-				break;
-			case TOUCHE_BAS:
-			case TOUCHE_S:
-				gestionTouche.recule = false;
-				break;
-		}
-		tank.arreter();
-	}*/
+	this.setAviserServeurPointage = function(aviser){
+		aviserServeurPointage = aviser;
+	}
 
+	this.setAviserServeurGagnant = function(aviser){
+		console.log("allo allo test test");
+		aviserServeurGagnant = aviser;
+	}
 
-	var gererDeplacementsTank = function(){
-		if (gestionTouche.tourneDroite){
-			tank.tourner("D");
+	this.getScoreJ1 = function(){
+		return scoreJoueur1.texte + scoreJoueur1.valeur;
+	}
+
+	this.getScoreJ2 = function(){
+		return scoreJoueur2.texte + scoreJoueur2.valeur;
+	}
+
+	this.getNumeroJoueur = function(){
+		return NumeroJoueur;
+	}
+
+	this.setPseudonymes = function (nomJoueur1, nomJoueur2){
+		scoreJoueur1.texte = nomJoueur1 + " - points : ";
+		scoreJoueur2.texte = nomJoueur2 + " - points : ";
+		afficherScore();
+	}
+
+	var gererDeplacementsTankJoueur = function(tankJoueur, gestionToucheJoueur){
+		if (gestionToucheJoueur.tourneDroite){
+			tankJoueur.tourner("D");
 		} else
-		if (gestionTouche.tourneGauche){
-			tank.tourner("G");
+		if (gestionToucheJoueur.tourneGauche){
+			tankJoueur.tourner("G");
 		} else
-		if (gestionTouche.avance){
-			tank.avancer();
+		if (gestionToucheJoueur.avance){
+			tankJoueur.avancer();
 		} else
-		if (gestionTouche.recule){
-			tank.reculer();
+		if (gestionToucheJoueur.recule){
+			tankJoueur.reculer();
 		} else {
-			tank.arreter();
+			tankJoueur.arreter();
 		}
 	}
 
@@ -298,7 +343,7 @@ var Jeu = function(){
 		return (nbCollision != 0);
 	}
 
-	var gererCollisionBoiteBalle = function(listeBalle, listeBoite){//verifie la collision entre une liste de boite et une liste de balle
+	var gererCollisionBoiteBalle = function(listeBalle, listeBoite, indexJoueur){//verifie la collision entre une liste de boite et une liste de balle
 		listeBoite.forEach(boite => {
 			if (boite.getVie() > 0){
 				listeBalle.forEach(balle => {
@@ -306,10 +351,8 @@ var Jeu = function(){
 						if (gerercollisionEntreRectangle(balle.getRectangle(),boite.getRectangle())){
 							balle.rentrerEncollision();
 							if (boite.toucher()){//true si la boite est "morte" lors de l'impact
-								scoreJoueur.valeur++;
-								afficherScore();
-								if (scoreJoueur.valeur >= 7){
-									mur.detruire();
+								if (indexJoueur == NumeroJoueur){
+									aviserServeurPointage();
 								}
 							}
 						}
@@ -319,14 +362,24 @@ var Jeu = function(){
 		});
 	}
 
-	var gererCollisionTank = function(rectangleTank, listeboite){//verifie la collision entre un tank et une liste de boite
+	var gererCollisionTank = function(tankjoueur ,rectangleTank, listeboite){//verifie la collision entre un tankJoueur1 et une liste de boite
 		listeBoite.forEach(boite => {
 			if (boite.getVie() > 0){
 				if (gerercollisionEntreRectangle(rectangleTank,boite.getRectangle())){
-					tank.annulerMouvement();
+					tankjoueur.annulerMouvement();
 				}
 			}
 		});
+	}
+
+	var terminerJeu = function(gagner){//termine le jeu	
+		if (gagner != null){
+			if (gagner){
+				window.location.href = "#fin-partie-gagnee";
+			} else {
+				window.location.href = "#fin-partie-perdue";
+			}
+		}
 	}
 
     initialiser();

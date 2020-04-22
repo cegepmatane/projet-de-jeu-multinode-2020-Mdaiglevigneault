@@ -4,14 +4,13 @@
     var jeu;
 
     //vues
-    var vueAccueil;
+    var musique;
     var vueJeu;
     var vueFin;
 
     var multijoueur;
 
     var initialiser = function(){//cree les vue jeu, accueil et fun et affiche accueil
-        //vueAccueil = new VueAccueil(lancerJeu);OLD
         vueJeu = new VueJeu();
         vueFin = new VueFin();
         
@@ -19,9 +18,9 @@
 
         multijoueur = new Multijoueur(validerNom);
 
-        //vueAccueil.afficher(null);OLD
         multijoueur.initialiserVue(nomJoueur);
         
+        createjs.Sound.registerSound("sons/Open.mp3", "action");
 
         window.addEventListener("hashchange", naviguer);
     }
@@ -31,15 +30,23 @@
             var hash = window.location.hash;
             if (hash.match(/^#accueil/)){
                 multijoueur.initialiserVue(nomJoueur);
-                //vueAccueil.afficher(nomJoueur);
             } else if (hash.match(/^#jouer/)){
+                musique = createjs.Sound.play("action");
                 creeJeu();
             } else if (hash.match(/^#fin-partie-gagnee/)){
+                if (jeu.getNumeroJoueur() == 1){
+                    vueFin.afficher("Partie gagne!", jeu.getScoreJ1(), jeu.getScoreJ2());
+                } else {
+                    vueFin.afficher("Partie gagne!", jeu.getScoreJ2(), jeu.getScoreJ1());
+                }
                 jeu = null;
-                vueFin.afficher("Partie gagne!");
-            }else if (hash.match(/^#fin-partie-perdue/)){
+            }else if (hash.match(/^#fin-partie-perdue/)){ 
+                if (jeu.getNumeroJoueur() == 1){
+                    vueFin.afficher("Partie perdue!", jeu.getScoreJ2(), jeu.getScoreJ1());
+                } else {
+                    vueFin.afficher("Partie perdue!", jeu.getScoreJ1(), jeu.getScoreJ2());
+                }
                 jeu = null;
-                vueFin.afficher("Partie perdue!");
             }
         }
     }

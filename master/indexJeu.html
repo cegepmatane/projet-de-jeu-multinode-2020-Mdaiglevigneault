@@ -4,6 +4,7 @@
 		<meta charset="utf-8">
 		<title>the dark sea</title>
 		<script src="librairie/easeljs-0.8.2.min.js"></script>
+		<script src="https://code.createjs.com/1.0.0/createjs.min.js"></script>
 		<script src="librairie/MultiNode.js"></script>
 		<script src="Tank.js"></script>
 		<script src="Balle.js"></script>
@@ -13,7 +14,6 @@
 		<script src="ArrierePlan.js"></script>
 		<script src="Jeu.js"></script>
 		<script src="multijoueur.js"></script>
-		<script src="VueAccueil.js"></script>
 		<script src="VueFin.js"></script>
 		<script src="VueJeu.js"></script>
 		<script src="application.js"></script>
@@ -109,9 +109,18 @@
 				margin: 10px;
 			}
 
-			.score-texte {
+			#score-div-droite {
+				right: 0px;
+				margin: 10px;
+			}
+
+			.score1-texte , .score2-texte{
 				text-align: center;
 				color: white;
+			}
+
+			#tableau {
+				margin-top: 50px;
 			}
 			
 
@@ -139,15 +148,20 @@
 				<div class="menu">
 					<h2>{texte-fin-partie}</h2>
 					<a href="#accueil">Accueil</a>
+					<div id="tableau">
+						<p>{texte-gagnant}</p>
+						<p>{texte-perdant}</p>
+					</div>
 				</div>
 			</div>
 		</script>
 
 		<script type="plain/text" id="page-jeu">
 			<div class="score-div" id="score-div-gauche">
-				<h3 class="score-texte" id="scoreJ1">score : </h3>
-				<a href="#fin-partie-gagnee">fin Gagnante</a>
-				<a href="#fin-partie-perdue">fin Perdue</a>
+				<h3 class="score1-texte" id="scoreJ1">score : </h3>
+			</div>
+			<div class="score-div" id="score-div-droite">
+				<h3 class="score2-texte" id="scoreJ2">score : </h3>
 			</div>
 			<canvas id="dessin" height="763" width="1563"></canvas>
 		</script>

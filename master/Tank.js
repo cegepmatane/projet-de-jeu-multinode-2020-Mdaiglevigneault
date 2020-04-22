@@ -1,4 +1,4 @@
-var Tank = function(scene){
+var Tank = function(scene, numeroJoueur){
 
     var imageTank;
     var spriteSheet;
@@ -11,7 +11,7 @@ var Tank = function(scene){
     var echelle = 0.3;
 
     //parametre de controle pour le joueur
-    var dernierEmplacement = {x:100,y:365};
+    var dernierEmplacement;
     var nombreBalles = 30;
     var ballesUtilise = [];
     var ballesDispo = [];
@@ -19,11 +19,21 @@ var Tank = function(scene){
     var velociteX;
     var velociteY;
     var deltaAngle = 0.03;
-    var angle = 0;
+    var angle;
     var tempsDernierTir = 0;
     var delaisTirMilisecondes = 100;
 
     var initialiser = function(){//cree l'image du tank et cree des balles
+        if (numeroJoueur == 1){
+            dernierEmplacement = {x:100,y:365}
+            angle = 0;
+        } else if (numeroJoueur == 2){
+            dernierEmplacement = {x:1400,y:366}
+            angle = 3.14;
+        }
+
+        createjs.Sound.registerSound("sons/zapsplat_warfare_bullet_pass_by_001_43604.mp3", "shoot");
+
 	    imageTank =  new Image();
         imageTank.onload = creerSpriteSheet;
         imageTank.src = "illustration/tanksheet.png";
@@ -57,11 +67,15 @@ var Tank = function(scene){
         spriteTank.setBounds(
             spriteTank.x, spriteTank.y,
             frame.width*echelle, frame.height*echelle);
+        spriteTank.rotation = angle*180/Math.PI;
         charge = true;
     }
 
     var verifierLimiteDeJeu = function(){//verifie et s'assure que le tank ne sort pas de la zone de jeu
-        if (spriteTank.x <= 44 || spriteTank.x >= 660 || spriteTank.y <= 104 || spriteTank.y >= 639){
+        if (numeroJoueur == 1 && (spriteTank.x <= 44 || spriteTank.x >= 635 || spriteTank.y <= 104 || spriteTank.y >= 639)){
+            retournerEnArriere();
+        }
+        if ((numeroJoueur == 2 && (spriteTank.x <= 900 || spriteTank.x >= 1490 || spriteTank.y <= 104 || spriteTank.y >= 639))){
             retournerEnArriere();
         }
     }
@@ -203,7 +217,6 @@ var Tank = function(scene){
         if (tempsActuel - tempsDernierTir >= delaisTirMilisecondes){
             var balle = getballeDispo();
             if (balle != null){
-                console.log("tir!!");
                 if (spriteTank.currentAnimation != "tir"){
                     spriteTank.gotoAndPlay("tir");
                     spriteTank.animationend = function(){
@@ -211,6 +224,7 @@ var Tank = function(scene){
                     }
                 }
                 balle.estTirer({x: spriteTank.x,y: spriteTank.y}, angle);
+                createjs.Sound.play("shoot");
                 tempsDernierTir = tempsActuel;
             }
         }

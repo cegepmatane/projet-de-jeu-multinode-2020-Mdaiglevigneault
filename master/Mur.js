@@ -1,4 +1,4 @@
-var Mur = function(scene){
+var Mur = function(scene, index){
 
     var charge;
     var image;
@@ -39,7 +39,12 @@ var Mur = function(scene){
         sprite.scaleX = echelle.x;
         sprite.scaleY = echelle.y;
         sprite.regX = sprite.regY = 25;
-        sprite.x = 729;
+        if (index == 1){
+            sprite.x = 729;
+        } else {
+            sprite.x = 804;
+        }
+        
         sprite.y = 365;
         sprite.setBounds(
             sprite.x, sprite.y,
