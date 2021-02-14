@@ -20,6 +20,15 @@
 		
 
 		<style>
+			*{
+				font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+				color: white;
+				padding: 5px;
+				margin: 5px;
+				border-radius: 5px;
+				text-decoration: none;
+			}
+
 			html {
 			margin: 0;
 			padding: 0;
@@ -39,6 +48,10 @@
 				width: 100%;
 			}
 
+			#pseudonyme {
+				color: black;
+			}
+
 			#menu-container {
 				width: 340px;
 				text-align: center;
@@ -47,34 +60,23 @@
 
 			#menu-container h1 {
 				font-size: 50px;
-				color: white;
-				font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 				font-weight: bold;
 				margin-top: 30px;
 				margin-bottom: 200px;
 			}
 
 			.menu {
-				color: white;
-				padding: 30px;
-				border-radius: 25px;
-				background-color: grey;
+				background-color: rgba(0, 0, 0, 0.5);
 			}
 
-			.menu h2{
-				color: black;
-				margin-bottom: 50px;
+			fieldset, #bouton-authentification {
+				border: 0;
 			}
 
 			.menu a{
-				color: black;
-				padding: 20px;
-				border-radius: 20px;
-				text-decoration: none;
 				background-color: rgb(70, 70, 70);
 			}
 			.menu a:hover {
-				color:white;
 				background-color: rgb(17, 17, 17);
 			}
 
@@ -83,24 +85,19 @@
 				z-index: 1;
 				width: auto;
 				height: auto;
-				background-color: black;
+				background-color: rgba(0, 0, 0, 0.5);
 			}
 
 			.score-div *{
-				margin: 5px;
 				display: inline-block;
 			}
 
-			.score-div a {
-				color: black;
-				padding: 5px;
-				margin: 5px;
-				border-radius: 20px;
+			.score-div a, #bouton-authentification {
 				text-decoration: none;
 				background-color: grey;
 			}
 
-			.score-div a:hover {
+			.score-div a:hover, #bouton-authentification:hover {
 				background-color: rgb(102, 102, 102);
 			}
 
@@ -116,14 +113,7 @@
 
 			.score1-texte , .score2-texte{
 				text-align: center;
-				color: white;
 			}
-
-			#tableau {
-				margin-top: 50px;
-			}
-			
-
 		</style>
 	</head>
 	<body>
@@ -133,7 +123,7 @@
 				<div class="menu">
 					<form id="formulaire-authentification">
 						<fieldset>
-							<label>Entrer votre Nom :</label>
+							<label>Entrer votre Nom :</label><br>
 							<input type="text" id="pseudonyme"/>
 							<input type="submit" id="bouton-authentification" value="Jouer"/>
 						</fieldset>
